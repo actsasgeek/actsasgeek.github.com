@@ -16,21 +16,21 @@ provide fodder for blog posts as well. Hopefully the topics will be interesting 
 Since this is the first blog post, I need to test some things out...there will invariably be some Clojure. That is the
 language that I use most during the day:
 
-{% highlight clojure %}
+```clojure
 (defn my-juxt [x fs]
   (mapv (fn [f] (f x)) fs))
-{% endhighlight %}
+```
 
 And some Python and R, since they are the co-*lingua franca* of data science:
 
-{% highlight python %}
+```python
 def my_juxt( x, fs):
   return [f( x)] for f in fs]
-{% endhighlight %}
+```
 
 and
 
-{% highlight r %}
+```r
 my.juxt <- function( x, fs) {
   results <- c()
   for ( f in fs) {
@@ -38,7 +38,7 @@ my.juxt <- function( x, fs) {
   }
   return( results)
 }
-{% endhighlight %}
+```
 
 I should mention that I only know enough R to get around. Interestingly enough all three languages support functions
 as first class values.

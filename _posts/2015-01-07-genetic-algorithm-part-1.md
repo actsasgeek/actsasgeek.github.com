@@ -82,7 +82,7 @@ There are a host of other things we might return. For example, we might return s
 
 If you have `git` and `lein` installed you can do:
 
-{% highlight bash %}
+```bash
 $ git clone https://github.com/actsasgeek/dawkins.git
 $ cd dawkins
 $ git checkout -b 2015-01-07
@@ -91,13 +91,13 @@ $ lein repl
 user=>
 user=> (require '[dawkins.genetic-algorithm :refer [genetic-algorithm]])
 nil
-{% endhighlight %}
+```
 
 Here's a quick explanation of the code you just loaded.
 
 To make an individual, we need to be able to generate random bits of a certain length. We can also evaluate the fitness of an individual's genome when it's created and store it. For Clojure, the likely candidate is a map with keys `:genome` and `:fitness`. Although the genome can literally be a String, we're going to use a Vector of bits here.
 
-{% highlight clojure %}
+```clojure
 (defn rand-bit
 	"Returns a random bit 0 or 1 with a 50/50 probability."
   []
@@ -115,20 +115,20 @@ To make an individual, we need to be able to generate random bits of a certain l
   (let [genome (random-genome k)]
     {:genome genome
      :fitness (f genome)}))
-{% endhighlight %}
+```
 
 We can make our initial population by generating n random individuals. We will store the population in a Vector because we'll need to access individuals by index later:
 
-{% highlight clojure %}
+```clojure
 (defn random-population 
 	"Generate a random n-sized population of individuals with a genome of length k and fitness f(genome)."
   [n k f]
   (into [] (repeatedly n #(random-individual k f))))
-{% endhighlight %}
+```
 
 Let's start with the basic genetic algorithm operations: mutation and crossover. The mutation operator that we're going to implement takes a mutation rate and genome as parameters and flips a single bit in the genome with probability *mutation-rate*.
 
-{% highlight clojure %}
+```clojure
 (defn flip-bit 
 	"For bit = 0, returns 1; 1, 0."
   [bit]
@@ -142,11 +142,11 @@ Let's start with the basic genetic algorithm operations: mutation and crossover.
     (let [mutation-point (rand-int (count genome))]
       (into [] (concat (take mutation-point genome) [(-> genome (nth mutation-point) flip-bit)] (drop (inc mutation-point) genome))))
     genome))
-{% endhighlight %}
+```
 
 The crossover operator involves taking the two parents who are selected and with probability *crossover-rate* recombining their genomes. We're going to implement single-point crossover which means that the genomes will be recombined as we discussed above...at a single point. Note that it is possible for this to be a no-op and that's not really a problem, it just means that our effective *crossover-rate* is slightly smaller than what we explicitly set:
 
-{% highlight clojure %}
+```clojure
 (defn cross 
 	"Given two genomes, the 'front' and the 'back' and a point of crossover, append the point number
   of genes from the front genome to the back genome with the point number of genes removed."
@@ -163,11 +163,11 @@ The crossover operator involves taking the two parents who are selected and with
     (let [point (rand-int (count dad-genome))]
       [(cross dad-genome mom-genome point) (cross mom-genome dad-genome point)])
     [dad-genome mom-genome]))
-{% endhighlight %}
+```
 
 We can now combine these two operators into a single breed function:
 
-{% highlight clojure %}
+```clojure
 (defn breed 
 	"This function combines the crossover and mutation operators (given two parents) and creates new, fitness-evaluated individuals."
   [dad mom fitness mutation-rate crossover-rate]
@@ -175,11 +175,11 @@ We can now combine these two operators into a single breed function:
         son (mutate mutation-rate son)
         dau (mutate mutation-rate dau)]
     [{:genome son :fitness (fitness son)} {:genome dau :fitness (fitness dau)}]))
-{% endhighlight %}
+```
 
 In order to breed two individuals, we have to select them. This implementation uses roulette wheel proportionate selection. The first function calculates the probability distribution based on the fitness values of the individuals in the population. The second function selects an individual (as an index) given that vector of probabilities. We can then use that index to pull the actual individual out of the population.
 
-{% highlight clojure %}
+```clojure
 (defn calculate-sampling-probabilities 
 	"Roulette Wheel Selection requires that we calculate the size of the 'slots' in the roulette wheel to be proportionate to the
  relative fitness of each individual. If all individuals had the same fitness, then all individuals would have equal probabilities
@@ -202,11 +202,11 @@ In order to breed two individuals, we have to select them. This implementation u
         (if (< mark current)
          sampled-index
          (recur (- mark current) (inc sampled-index) (rest probabilities)))))))
-{% endhighlight %}
+```
 
 We can bring all of the previous functions together to select two parents and, probabilistically, apply crossover and mutation to create two children:
 
-{% highlight clojure %}
+```clojure
 (defn pair-off-and-breed 
 	"This is the main function for creating two (possibly) new individuals from two parents. It selects two parents at random from the population
  using roulette wheel selection and then applies one-point crossover with probability crossover-rate and single locus mutation with probability
@@ -215,21 +215,21 @@ We can bring all of the previous functions together to select two parents and, p
   (let [dad (population (roulette-wheel-selection probabilities))
         mom (population (roulette-wheel-selection probabilities))]
     (breed dad mom fitness mutation-rate crossover-rate)))
-{% endhighlight %}
+```
 
 There isn't much more to do. We need to repeat this function n / 2 times to create the next generation of the genetic algorithm:
 
-{% highlight clojure %}
+```clojure
 (defn make-next-generation 
 	"Creates the next generation for the genetic algorithm."
   [population n fitness mutation-rate crossover-rate]
   (let [probabilities (calculate-sampling-probabilities population)]
     (into [] (flatten (repeatedly (/ n 2) #(pair-off-and-breed population probabilities fitness mutation-rate crossover-rate))))))
-{% endhighlight %}
+```
 
 As we previously noted, we aren't going to start off collecting much in the way of information or statistics, just the best individual of a generation:
 
-{% highlight clojure %}
+```clojure
 (defn compare-fitness 
 	"Compares two individuals a and b using their :fitness values and returns the one with the larger fitness."
   [a b]
@@ -241,11 +241,11 @@ As we previously noted, we aren't going to start off collecting much in the way 
 	"Returns statistics about the population. Currently, it returns only the fittest individual."
   [population n]
   (reduce compare-fitness population))
-{% endhighlight %}
+```
 
 We now get to the main function, `genetic-algorithm` that takes a problem and returns the best solution over the entire simulation:
 
-{% highlight clojure %}
+```clojure
 (defn genetic-algorithm 
 	"Applies the genetic algorithm to the problem and returns the best individual generated. The problem is a map that contains the keys:
 	 max-generations: the number of generations to run the GA simulation
@@ -266,7 +266,7 @@ We now get to the main function, `genetic-algorithm` that takes a problem and re
        (let [next-generation (make-next-generation current-generation n fitness mutation-rate crossover-rate)
              candidate (statistics next-generation n)]
              (recur next-generation (compare-fitness solution candidate) (inc generation-no)))))))
-{% endhighlight %}
+```
 
 For now, the function prints out the best of the initial population so that we can see that things are improving. We'll do something a bit better in the next blog post.
 
@@ -274,7 +274,7 @@ For now, the function prints out the best of the initial population so that we c
 
 With the code implemented (and REPL tested), we can try it out. The easiest test is "max-ones". Each individual will be 100 bits and the fitness function will calculate the number of bits set to "1". We will run the simulation for 500 generations, the number of individuals (n) will be 100, the length of the genome (k) will be 100, the mutation-rate will be 0.05 and the crossover-rate will be 0.9. In the REPL:
 
-{% highlight clojure %}
+```clojure
 $ (def problem {
 	:max-generations 500
 	:n 100
@@ -283,19 +283,19 @@ $ (def problem {
 	:mutation-rate 0.05
 	:crossover-rate 0.9
 })
-{% endhighlight %}
+```
 
 We can now call `genetic-algorithm` on our problem:
 
-{% highlight clojure %}
+```clojure
 $ (genetic-algorithm problem)
-{% endhighlight %}
+```
 
 which yields:
-{% highlight clojure %}
+```clojure
 Initial best: {:genome [1 1 0 1 0 0 1 1 0 0 1 0 1 0 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 0 1 1 0 0 1 0 1 0 0 1 0 1 1 1 1 0 1 1 1 0 1 1 1 1 1 0 1 1 1 0 0 0 0 1 1 1 0 0 1 1 1 1 1 0 1 0 0 0 1 1 0 0 0 1 1 0 1 0 1 1 0], :fitness 64}
 => {:genome (1 1 1 1 1 0 1 1 1 1 1 1 1 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 0 0 1 1 1 1 1 1 1 1 1 0 1 0 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 0 1 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 0), :fitness 86}
-{% endhighlight %}
+```
 
 The best individual of the initial population has a fitness of 64 (64 bits set to 1). This is about what we should expect. The genome of each individual is a sequence of 100 bernoulli trials with a 50% probability of "success". The mean fitness should be around 50. Based on the central limit theorem, we can guess that fitness is approximately normally distributed around 50 and because we took the best individual, we're looking at the right hand side of the distribution.
 
