@@ -218,11 +218,9 @@ user=> (ecological-bin-packing [[6 8 3 2] [9 1 8 8] [3 7 2 5] [3 4 7 1]])
 ([(1 0 3 2) 48] [(0 3 1 2) 49] [(1 3 0 2) 51] [(3 0 1 2) 52] [(1 2 3 0) 53] [(0 2 3 1) 54] [(0 2 1 3) 55] [(1 3 2 0) 56] [(2 0 3 1) 56] [(2 3 1 0) 56] [(0 3 2 1) 57] [(1 0 2 3) 57] [(1 2 0 3) 57] [(2 0 1 3) 57] [(3 2 1 0) 57] [(0 1 3 2) 58] [(2 3 0 1) 59] [(3 0 2 1) 60] [(3 2 0 1) 60] [(3 1 0 2) 64] [(2 1 3 0) 65] [(0 1 2 3) 67] [(2 1 0 3) 69] [(3 1 2 0) 69])
 ```
 
-Just for fun, here's a solution in Python as well. I changed some of the names of functions/arguments between languages. Also note how with Clojure's immmutable data structures, the deepcopy business was not required.
+Just for fun, here's a solution in Python as well. I changed some of the names of functions/arguments between languages.
 
 ```python
-import copy
- 
 def translate_bottles_to_moves( bottle_matrix):
   result = []
   for row in bottle_matrix:
@@ -240,7 +238,6 @@ def solve_2_by_2( full_matrix, row_indices, column_indices):
 def calculate_subindices( indices):
   results = []
   for i in xrange( len( indices)):
-    indices_clone = copy.deepcopy( indices)
     removed = indices[0:i] + indices[i+1:]
     results.append( removed)
   return results
