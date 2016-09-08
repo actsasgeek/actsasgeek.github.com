@@ -9,5 +9,5 @@ twitter_username: acts_as_geek
 github_username:  actsasgeek
 
 # Build settings
-markdown: redcarpet #kramdown
+markdown: kramdown
 highlighter: pygments

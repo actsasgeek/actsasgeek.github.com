@@ -359,7 +359,7 @@ Here we want to use an algorithm that works with the two things we have: a parti
 
 So that's basically it for working with text. You get your text into some structured representation and then apply some machine learning algorithm that uses distance or similarity as the main component and pick a metric. Some representations suggest other approaches. For example, term *frequencies* itself suggests a Bayesian approach might be used and indeed it is easy to adapt both the Binomial and Multinomial Naive Bayes Classifiers to NLP classification problems. Perhaps another blog post can cover those.
 
-I have, however, until now, swept the hardest part under the rug. How did I get the List of words,
+Done right? Well, not quite so fast. How did I get the List of words,
 
 ```python
 words = ["wet", "cold", "wet", "cold", "guinness", "rocky", "leprechaun", "wool"]
@@ -371,9 +371,9 @@ And now we will find that *this* is the hard part.
 
 ## Working with Raw Text
 
-How do we turn a tweet, a sonnet, a novel or a scientific article into a Bag of Words in the first place? At first glance, it seems easy enough...just break one whitespace. Well, that's easy enough for *English*, what about Chinese? What do we do about punctuation? In the old days, we simply removed it. What do we do in the Age of Emojis? Is ;) a word? Of course, now we have actual emoji names with :smile: is that different than smile or :)? Do we count all those "of" and "the" and "and"? Shouldn't "am", "be", "is" all be the same? What about "ur" and "you're"? Eek.
+How do we turn a tweet, a sonnet, a novel or a scientific article into a Bag of Words in the first place? At first glance, it seems easy enough...just break up whitespace. Well, that's easy enough for *English*, what about Chinese? What do we do about punctuation? In the old days, we simply removed it. What do we do in the Age of Emojis? Is ;) a word? Of course, now we have actual emoji names with :smile: is that different than smile or :)? Do we count all those "of" and "the" and "and"? Shouldn't "am", "be", "is" all be the same? What about "ur" and "you're"? Eek.
 
-This is certainly where "dirty" comes in. Start simple and iterate with an eye to your particular use case.
+This is certainly where the "dirty" comes in. Start simple and iterate with an eye to your particular use case.
 
 These questions come up so often they have names:
 
