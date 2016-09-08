@@ -2,7 +2,7 @@
 layout: post
 title: "What is the Randomness in Data?"
 date: 2015-07-01 00:00
-tags: genetic algorithm, evolutionary computation, optimization
+tags: data, uncertainty, randomness
 ---
 
 ```lisp
