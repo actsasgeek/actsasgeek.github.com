@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Review: Doing Data Science with Clojure (talk)"
-date: 2016-09-14 00:00
+date: 2016-09-27 00:00
 tags: data science, clojure, conferences
 ---
 I often joke that when I go to data science conferences, I want to be a data scientist and when I go to software engineering conferences, I want to be a software engineer. I find it interesting when they intersect. And so it is with [Doing Data Science with Clojure: The Ugly, the Sad, the Joyful](https://www.youtube.com/watch?v=PSTSO8K80U4).
