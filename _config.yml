@@ -2,7 +2,7 @@
 title: Engineered Intelligen(ce|t) Engineering
 email: actsasgeek@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-  A blog in the fuzzy intersection of software engineering, artificial intelligence and data-science.
+  A blog in the fuzzy intersection of software engineering, artificial intelligence and data-science. All the views expressed here are mine. I may even change them from time to time.
 baseurl: "" # the subpath of your site, e.g. /blog/
 url: "http://actsasgeek.github.io" # the base hostname & protocol for your site
 twitter_username: acts_as_geek
