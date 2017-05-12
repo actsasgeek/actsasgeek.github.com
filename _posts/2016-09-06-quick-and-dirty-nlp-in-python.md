@@ -41,37 +41,37 @@ One approach is to simply note, true or false, if each possible term is in the b
 
 We will be using a very simplified set of documents for these exercises so we can get a feel for what is going on rather than being overwhelmed by details.
 
-```python
+{% highlight python %}
 bag_of_words = ["wet", "cold", "wet", "green", "leprechaun", "shamrock", "shamrock"]
 terms = set( bag_of_words)
 print terms
-```
+{% endhighlight %}
 
 yields
 
-```
+{% highlight python %}
 set(['shamrock', 'leprechaun', 'cold', 'green', 'wet'])
-```
+{% endhighlight %}
 
 The next level is to count the number of times each term appears. "is" might occur 20 times whereas "run" might occur 2 times. We just count them. It's easy to do in Python with a Counter.
 
-```python
+{% highlight python %}
 from collections import Counter
 
 bag_of_words = ["wet", "cold", "wet", "green", "leprechaun", "shamrock", "shamrock"]
 term_counts = Counter( bag_of_words)
 print term_counts
-```
+{% endhighlight %}
 
 yields
 
-```
+{% highlight python %}
 Counter({'shamrock': 2, 'wet': 2, 'leprechaun': 1, 'cold': 1, 'green': 1})
-```
+{% endhighlight %}
 
 If you're working with Tweets, counting might be ok because the absolute number of words is fairly limited. However, if you're looking at something like emails, some are short and some are long and "is" will certainly appear fewer times in the shorter emails than the longer ones. Here we introduce the idea of (relative) *frequency*. You simply divide each count by the number of words in the document. We can do this by using a Counter then a Dictionary Comprehension.
 
-```python
+{% highlight python %}
 from collections import Counter
 
 bag_of_words = ["wet", "cold", "wet", "green", "leprechaun", "shamrock", "shamrock"]
@@ -79,13 +79,14 @@ number_of_words = float( len( bag_of_words))
 term_counts = Counter( bag_of_words)
 term_frequencies = {t: c/number_of_words for (t, c) in term_counts.items()}
 print term_frequencies
-```
+{% endhighlight %}
 
 yields
 
-```
+{% highlight python %}
 {'shamrock': 0.2857142857142857, 'leprechaun': 0.14285714285714285, 'cold': 0.14285714285714285, 'green': 0.14285714285714285, 'wet': 0.2857142857142857}
-```
+{% endhighlight %}
+
 This is technically known as *Term Frequency* or *TF*.
 
 We will talk about "common" words a bit later ("a", "the", "and") but in a more general context, when you have a large collection of documents, some words will occur very frequently across all documents and so they don't help distinguish between different types of documents. For example, suppose you have a set of documents dealing with finance and fly fishing. "bank" will occur in both documents and so "bank" might not be very good at deciding if two documents are similar or if one is about finance or another is about fishing. In order to combat this problem, we can introduce *Inverse Document Frequency*
@@ -94,7 +95,7 @@ $idf(t, D) = log\frac{|D|}{|{d \in D: t \in d}|}$
 
 Let's break this up into bits. The first function takes a list of words and returns a Dict of term frequencies:
 
-```python
+{% highlight python %}
 from __future__ import division
 from math import log
 
@@ -103,11 +104,11 @@ def tf( d):
   term_counts = Counter( d)
   term_frequencies = {t: c/number_of_words for (t, c) in term_counts.items()}
   return term_frequencies
-```
+{% endhighlight %}
 
 The next function takes a list of term frequency Dicts and returns a Dict of inverse document frequencies:
 
-```python
+{% highlight python %}
 def idf( tfs):
   terms = set([i for ls in map( lambda x: x.keys(), tfs) for i in ls])
   n = len( tfs)
@@ -120,10 +121,10 @@ def idf( tfs):
     counts[ t] = count
   inverse_document_frequencies = {t: log(n/counts[t]) for t in terms}
   return inverse_document_frequencies
-```
+{% endhighlight %}
 And now we can apply them to several documents about Ireland and Seattle:
 
-```python
+{% highlight python %}
 ds = [
    ["wet", "cold", "wet", "green", "leprechaun", "shamrock", "shamrock", "wet"],
    ["wet", "cold", "wet", "rocky", "hipster", "ipa", "evergreen"],
@@ -136,41 +137,42 @@ tfs = [tf( d) for d in ds]
 print tfs
 idfs = idf( tfs)
 print idfs
-```
+{% endhighlight %}
+
 If we dig through the term frequencies:
 
-```
+{% highlight python %}
 [{'shamrock': 0.25, 'leprechaun': 0.125, 'cold': 0.125, 'green': 0.125, 'wet': 0.375},
  {'evergreen': 0.14285714285714285, 'ipa': 0.14285714285714285, 'rocky': 0.14285714285714285, 'hipster': 0.14285714285714285, 'wet': 0.2857142857142857, 'cold': 0.14285714285714285},
  {'rocky': 0.125, 'guinness': 0.125, 'wet': 0.25, 'leprechaun': 0.125, 'cold': 0.25, 'wool': 0.125},
  {'rocky': 0.125, 'salmon': 0.125, 'pacific': 0.125, 'hipster': 0.125, 'wet': 0.25, 'cold': 0.25},
  {'cold': 0.375, 'wool': 0.125, 'hipster': 0.125, 'rocky': 0.125, 'wet': 0.25}]
-```
+{% endhighlight %}
 
 there isn't anything particularly new here. We can see that different words have different relative frequencies within their documents. However, when we look at IDF:
 
-```
+{% highlight python %}
 {'evergreen': 1.6094379124341003, 'ipa': 1.6094379124341003, 'rocky': 0.22314355131420976, 'guinness': 1.6094379124341003, 'leprechaun': 0.9162907318741551, 'salmon': 1.6094379124341003, 'pacific': 1.6094379124341003, 'shamrock': 1.6094379124341003, 'hipster': 0.5108256237659907, 'wet': 0.0, 'green': 1.6094379124341003, 'cold': 0.0, 'wool': 0.9162907318741551}
-```
+{% endhighlight %}
 
 `wet` and `cold` appear in every document and so they end up with $idf=0$. When we multiply $tf \times idf$, they won't be counted. On the other hand, terms like `pacific`, `ipa`, `wool` and `salmon` appear in only one document each so their idf values are 1.61. They will up-weight their respective TFs. `hipster` appears relatively frequently across documents so it has a score of 0.51.
 
 Create new tf-idf Dicts:
 
-```python
+{% highlight python %}
 tf_idfs  = [{t: tf * idfs[ t] for (t,tf) in d.items()} for d in tfs]
 print tf_idfs
-```
+{% endhighlight %}
 
 which yields:
 
-```
+{% highlight python %}
 [{'shamrock': 0.40235947810852507, 'leprechaun': 0.11453634148426939, 'cold': 0.0, 'green': 0.20117973905426254, 'wet': 0.0},
 {'evergreen': 0.22991970177630003, 'ipa': 0.22991970177630003, 'rocky': 0.03187765018774425, 'hipster': 0.07297508910942724, 'wet': 0.0, 'cold': 0.0},
 {'rocky': 0.02789294391427622, 'guinness': 0.20117973905426254, 'wet': 0.0, 'leprechaun': 0.11453634148426939, 'cold': 0.0, 'wool': 0.11453634148426939},
 {'rocky': 0.02789294391427622, 'salmon': 0.20117973905426254, 'pacific': 0.20117973905426254, 'hipster': 0.06385320297074884, 'wet': 0.0, 'cold': 0.0},
 {'cold': 0.0, 'wool': 0.11453634148426939, 'hipster': 0.06385320297074884, 'rocky': 0.02789294391427622, 'wet': 0.0}]
-```
+{% endhighlight %}
 
 by comparing to the original term frequencies, you can see which terms were upweighted and which terms were downweighted. [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) is not uncontroversial from a theoretical point of view.
 
@@ -195,7 +197,7 @@ $Jaccard = \frac{A\cap B}{A \cup B}$
 
 Python set operations have everything we need:
 
-```python
+{% highlight python %}
 d1 = set(tf_idfs[0].keys())
 d2 = set(tf_idfs[1].keys())
 print d1
@@ -206,20 +208,21 @@ union = d1.union( d2)
 print union
 jaccard = len( intersection)/len( union)
 print jaccard
-```
+{% endhighlight %}
+
 which will give us:
 
-```
+{% highlight python %}
 set(['shamrock', 'leprechaun', 'cold', 'green', 'wet'])
 set(['evergreen', 'ipa', 'rocky', 'hipster', 'wet', 'cold'])
 set(['cold', 'wet'])
 set(['evergreen', 'ipa', 'rocky', 'shamrock', 'hipster', 'green', 'wet', 'leprechaun', 'cold'])
 0.222222222222
-```
+{% endhighlight %}
 
 Because the numerator is bounded by the denominator, we can say that document 1 is 22% similar to document 2, our goal would be to find the document that document 1 is most similar to:
 
-```python
+{% highlight python %}
 def jaccard(a, b):
   d1 = set(a.keys())
   d2 = set(b.keys())
@@ -227,23 +230,23 @@ def jaccard(a, b):
   union = d1.union( d2)
   jaccard = len( intersection)/len( union)
   return jaccard
-```
+{% endhighlight %}
 
 with
 
-```
+{% highlight python %}
 >>> jaccard( tf_idfs[0], tf_idfs[ 1])
 0.2222222222222222
-```
+{% endhighlight %}
 
 If we take document 1 and loop over the others, the most similar document is:
 
-```python
+{% highlight python %}
 for i, d in enumerate( tf_idfs[1:]):
   print i + 2, jaccard( tf_idfs[ 0], d)
-```
+{% endhighlight %}
 
-```
+{% highlight python %}
 >>> for i, d in enumerate( tf_idfs[1:]):
 ...   print i + 2, jaccard( tf_idfs[ 0], d)
 ...
@@ -251,13 +254,13 @@ for i, d in enumerate( tf_idfs[1:]):
 3 0.375
 4 0.222222222222
 5 0.25
-```
+{% endhighlight %}
 
 Document 3 or
 
-```
+{% highlight python %}
    ["wet", "cold", "wet", "cold", "guinness", "rocky", "leprechaun", "wool"],
-```
+{% endhighlight %}
 
 That makes sense. Whew.
 
@@ -267,51 +270,51 @@ $cos(a, b) = \frac{A}{||A||}\frac{B}{||B||}$
 
 which is to say, it is the dot product of the normalized (unit vectors) of A and B. Normalization is straight-forward, we just need the length of the vector:
 
-```python
+{% highlight python %}
 from math import sqrt
 
 def length( tf):
   return sqrt(sum([v**2 for v in tf.values()]))
-```
+{% endhighlight %}
 which is the following for document 1:
 
-```
+{% highlight python %}
 >>> length( tf_idfs[0])
 0.4642036304794556
-```
+{% endhighlight %}
 
 If we divide the values through by the length, viola, normalized. I'm going to use the tfs instead of tf_idfs for this part of the exercise:
 
-```python
+{% highlight python %}
 unit_tfs = []
 for tf in tfs:
   normalizer = length( tf)
   unit_tfs.append({t: v/normalizer for t, v in tf.items()})
-```
+{% endhighlight %}
 
 Applying length again to a document, should yield 1:
 
-```
+{% highlight python %}
 >>> length( unit_tfs[ 0])
 1.0
-```
+{% endhighlight %}
 
 We need one last thing, a `dotproduct` function that understands sparse vectors:
 
-```python
+{% highlight python %}
 def dotproduct( a, b):
   result = 0.0
   for t in a.keys():
     if t in b:
       result = result + a[ t] * b[ t]
   return result
-```
+{% endhighlight %}
 
 You should convince yourself that it doesn't matter if we loop over the terms in a or b above.
 
 Now we can do our loop again, looking for documents similar to document 1:
 
-```
+{% highlight python %}
 >>> for i, d in enumerate( unit_tfs[1:]):
 ...     print i + 2, dotproduct( unit_tfs[ 0], d)
 ...
@@ -319,7 +322,7 @@ Now we can do our loop again, looking for documents similar to document 1:
 3 0.649519052838
 4 0.57735026919
 5 0.5625
-```
+{% endhighlight %}
 
 Again, Document 1 is most like Document 3.
 
@@ -361,9 +364,9 @@ So that's basically it for working with text. You get your text into some struct
 
 Done right? Well, not quite so fast. How did I get the List of words,
 
-```python
+{% highlight python %}
 words = ["wet", "cold", "wet", "cold", "guinness", "rocky", "leprechaun", "wool"]
-```
+{% endhighlight %}
 
 ?
 
@@ -397,22 +400,22 @@ In Python, the function is `lower()`. After converting a string to lowercase, we
 
 For punctuation, we can simply use a regular expression to replace everything that isn't whitespace or a letter with the empty string:
 
-```python
+{% highlight python %}
 >>> import re
 >>> re.sub( r'[^\w\s]', '', "This is. not! the way. it works?")
 'This is not the way it works'
-```
+{% endhighlight %}
 
 For actual tokenization, we can then split on whitespace:
 
-```python
+{% highlight python %}
 >>> re.split( r'\s', re.sub( r'[^\w\s]', '', "This is. not! the way. it works?"))
 ['This', 'is', 'not', 'the', 'way', 'it', 'works']
-```
+{% endhighlight %}
 
 And now we are were we started. Such a List of words can be fed into `tf()`. Let's combine it into one function:
 
-```python
+{% highlight python %}
 import re
 
 def preprocess_text( text):
@@ -424,27 +427,29 @@ def preprocess_text( text):
 words = preprocess_text( "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going direct to Heaven, we were all going direct the other way – in short, the period was so far like the present period, that some of its noisiest authorities insisted on its being received, for good or for evil, in the superlative degree of comparison only.")
 
 print Counter(words)
-```
+{% endhighlight %}
+
 which gives:
 
-```
+{% highlight python %}
 Counter({'the': 14, 'of': 12, 'was': 11, 'it': 10, 'we': 4, 'all': 2, 'direct': 2, 'us': 2, 'in': 2, 'its': 2, 'before': 2, 'for': 2, 'had': 2, 'epoch': 2, 'going': 2, 'season': 2, 'were': 2, 'age': 2, 'times': 2, 'period': 2, '': 1, 'superlative': 1, 'being': 1, 'spring': 1, 'received': 1, 'some': 1, 'authorities': 1, 'best': 1, 'like': 1, 'darkness': 1, 'to': 1, 'comparison': 1, 'only': 1, 'everything': 1, 'way': 1, 'so': 1, 'hope': 1, 'good': 1, 'belief': 1, 'degree': 1, 'that': 1, 'far': 1, 'evil': 1, 'wisdom': 1, 'short': 1, 'worst': 1, 'nothing': 1, 'insisted': 1, 'noisiest': 1, 'present': 1, 'winter': 1, 'on': 1, 'heaven': 1, 'incredulity': 1, 'light': 1, 'or': 1, 'foolishness': 1, 'despair': 1, 'other': 1})
-```
+{% endhighlight %}
+
 which shows the importance of removing stopwords.
 
 ### Removing Stopwords
 
 Stopword lists are available for many languages.  You can try [English Stopwords](http://www.ranks.nl/stopwords) for example. Unfortunately, it's not in a very nice format for use by a computer program. A little typing and multiple cursor-fu later, you might have something like:
 
-```python
+{% highlight python %}
 en_stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours	ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"]
-```
+{% endhighlight %}
 
 Of course, we already have a problem, we were so dirty that any place we had "weren't", we now have "werent" which wouldn't be so bad except that "she'll" is now "shell". You may get away with it, you may not.
 
 There is a temptation to remove stopwords too soon. There isn't much overhead to doing all the work we did and then simply removing any key in the TF Dict that is a stopword. If we want to handle other, at least European, languages we can change our function `preprocess_text` to take a List of stopwords.
 
-```python
+{% highlight python %}
 def preprocess_text( text, stopwords):
   lowercased = text.lower()
   normalized = re.sub( r'[^\w\s]', '', lowercased)
@@ -458,28 +463,29 @@ def preprocess_text( text, stopwords):
 words = preprocess_text( "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going direct to Heaven, we were all going direct the other way – in short, the period was so far like the present period, that some of its noisiest authorities insisted on its being received, for good or for evil, in the superlative degree of comparison only.", en_stopwords)
 
 print words
-```
+{% endhighlight %}
 
 which gives us:
 
-```
+{% highlight python %}
 Counter({'direct': 2, 'us': 2, 'epoch': 2, 'going': 2, 'season': 2, 'age': 2, 'times': 2, 'period': 2, '': 1, 'superlative': 1, 'spring': 1, 'received': 1, 'authorities': 1, 'best': 1, 'like': 1, 'darkness': 1, 'comparison': 1, 'everything': 1, 'way': 1, 'hope': 1, 'good': 1, 'belief': 1, 'degree': 1, 'far': 1, 'evil': 1, 'wisdom': 1, 'short': 1, 'worst': 1, 'nothing': 1, 'insisted': 1, 'noisiest': 1, 'present': 1, 'winter': 1, 'heaven': 1, 'incredulity': 1, 'light': 1, 'foolishness': 1, 'despair': 1})
-```
+{% endhighlight %}
+
 which is pretty flexible. We can use the keys for the Boolean representation, we can use the values for the Count representation and it's not difficult to transform it to the Frequency representation:
 
-```python
+{% highlight python %}
 def convert_to_tf( counts):
   n = sum( counts.values())
   return {t: v/n for t, v in counts.items()}
 
 print convert_to_tf( words)
-```
+{% endhighlight %}
 
 which gives us:
 
-```
+{% highlight python %}
 {'': 0.021739130434782608, 'superlative': 0.021739130434782608, 'spring': 0.021739130434782608, 'incredulity': 0.021739130434782608, 'direct': 0.043478260869565216, 'nothing': 0.021739130434782608, 'foolishness': 0.021739130434782608, 'best': 0.021739130434782608, 'darkness': 0.021739130434782608, 'everything': 0.021739130434782608, 'epoch': 0.043478260869565216, 'going': 0.043478260869565216, 'way': 0.021739130434782608, 'hope': 0.021739130434782608, 'good': 0.021739130434782608, 'belief': 0.021739130434782608, 'degree': 0.021739130434782608, 'comparison': 0.021739130434782608, 'far': 0.021739130434782608, 'season': 0.043478260869565216, 'evil': 0.021739130434782608, 'wisdom': 0.021739130434782608, 'heaven': 0.021739130434782608, 'worst': 0.021739130434782608, 'authorities': 0.021739130434782608, 'insisted': 0.021739130434782608, 'present': 0.021739130434782608, 'winter': 0.021739130434782608, 'received': 0.021739130434782608, 'short': 0.021739130434782608, 'like': 0.021739130434782608, 'light': 0.021739130434782608, 'age': 0.043478260869565216, 'us': 0.043478260869565216, 'times': 0.043478260869565216, 'despair': 0.021739130434782608, 'period': 0.043478260869565216, 'noisiest': 0.021739130434782608}
-```
+{% endhighlight %}
 
 I do notice one bug in `preprocess_text`. Our normalization allows for there to be the empty string as a possible token. We can revise the code to get rid of that with a `del counts['']` at the right spot.
 

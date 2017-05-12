@@ -16,7 +16,7 @@ Each row represents a glass color (for example, bottles made of brown, green, or
 
 ## A Greedy Approach
 
-Looking first a brown bottles, one option would be to move all the bottles to the first bin. This would require moving 3 bottles from bin 2 and 4 bottles from bin 3 or 7 bottles total. On the other hand, if we moved all the bottles to bin 2, we would move the 1 bottle from bin 1 and 4 bottles from bin 3 or 5 bottles total. Our final option would be to move the 1 bottle from bin 1 and 3 bottles from bin 2 to bin 3 which would be or 4 bottles total. 
+Looking first a brown bottles, one option would be to move all the bottles to the first bin. This would require moving 3 bottles from bin 2 and 4 bottles from bin 3 or 7 bottles total. On the other hand, if we moved all the bottles to bin 2, we would move the 1 bottle from bin 1 and 4 bottles from bin 3 or 5 bottles total. Our final option would be to move the 1 bottle from bin 1 and 3 bottles from bin 2 to bin 3 which would be or 4 bottles total.
 
 To see all the possibilities we can transform our table of bottle counts, to a table of bottle moves by replacing each bin count with the number of bottles that would need to be moved to the bin instead. We already did this for the first row and this is what it looks like for the current problem:
 
@@ -30,7 +30,7 @@ Looking at the this table, we can see that the minimum number of moves is accomp
 
 A little bit of thought reveals a flaw: what if all three colors have a minimum at the same bin? We can't move all the bottles to the same bin because they need to be in different bins. Maybe we can salvage our [greedy algorithm](http://en.wikipedia.org/wiki/Greedy_algorithm) by making that a special case? Let's see.
 
-If more than one glass color did have the same bin number for its largest count, we would be unable to move both colors to the same bin. Consider this setup: 
+If more than one glass color did have the same bin number for its largest count, we would be unable to move both colors to the same bin. Consider this setup:
 
 ```
 5   7   9
@@ -42,7 +42,7 @@ If we replace the number of bottles with the number of moves, we have:
 
 ```
 16  14  12
-13  9   8 
+13  9   8
 9   8   7
 ```
 
@@ -65,7 +65,7 @@ Turns out that the following has fewer total moves:
 
 ```
 -    -    12
--    9    - 
+-    9    -
 9    -    -
 ```
 
@@ -101,13 +101,13 @@ and transform it into move counts:
 12  11  8   14
 ```
 
-This matrix can be decomposed into four 3 bin problems: 
+This matrix can be decomposed into four 3 bin problems:
 
 ```
 13  -   -   -  | -   11  -   -  | -   -   16  -  | -   -   -   17
--   25  18  18 | 17  -   18  18 | 17  25  -   18 | 17  25  18  - 
+-   25  18  18 | 17  -   18  18 | 17  25  -   18 | 17  25  18  -
 -   10  15  12 | 14  -   15  12 | 14  10  -   12 | 14  10  15  -  
--   11  8   14 | 12  -   8   14 | 12  11  -   14 | 12  11  8   - 
+-   11  8   14 | 12  -   8   14 | 12  11  -   14 | 12  11  8   -
 ```
 
 And we already showed above how a three bin problem can be decomposed into three two bin problems. So it looks like this approach would work.
@@ -122,25 +122,25 @@ Now that we've figured it all out, let's implement the algorithm in Clojure.
 
 The firt function we'll need is one that converts from number of bottles to number of moves:
 
-```clojure
+{% highlight clojure %}
 (defn bottles-to-moves
   [bottle-matrix]
   (let [convert-row (fn [row] (let [total (apply + row)
                                     subtract-from-total (fn [x] (- total x))]
                                 (mapv subtract-from-total row)))]
     (mapv convert-row bottle-matrix)))
-```
+{% endhighlight %}
 
 We can also use a function that simplies access to our matrix which is a Vector of Vectors:
 
-```clojure
+{% highlight clojure %}
 (defn access [matrix r c]
   ((matrix r) c))
-```
+{% endhighlight %}
 
 As we previously noted, it's easy to write a hard-coded solution for the case of 2 bins and 2 colors of glass:
 
-```clojure
+{% highlight clojure %}
 (defn tally-moves-for-2-bins
   [moves-matrix bottle-indices bin-indices]
   (let [main-sum       (+ (access moves-matrix (bottle-indices 0) (bin-indices 0))
@@ -149,24 +149,24 @@ As we previously noted, it's easy to write a hard-coded solution for the case of
                           (access moves-matrix (bottle-indices 1) (bin-indices 0)))
         switch-indices (fn [indices] (into [] (concat (drop 1 indices) (take 1 indices))))]
     [[bin-indices main-sum] [(switch-indices bin-indices) off-sum]]))
-```
+{% endhighlight %}
 
 Notice, however, the memoization in the last line.
 
 For efficiency, we'll always use the full matrix but we'll work on a subset of it as described by a vector of indices. When we concentrate on a particular row and column of the NxN move matrix, we extract the number of moves and use the other rows and columns to construct the different (N-1)x(N-1) sub-problems. We need a function that generates those sets of sub-indices.
 
-```clojure
+{% highlight clojure %}
 (defn calculate-subindices
   "Given a list of n indices, calculate all n-1 subindices"
   [indices]
     (let [drop-nth (fn [xs n] (into [] (concat (subvec xs 0 n) (subvec xs (inc n) (count xs)))))]
       (mapv #(drop-nth indices %) (range 0 (count indices)))))
-```
+{% endhighlight %}
 
 We know have almost everything we need. We start with bottle index 0 which generates N possible subproblems (one for each bin). We recurse on that problem and generate (N-1) sub-subproblems from bottle 1. Recursing on those sub-subproblems, creates (N-2) sub-sub-subproblems...and so on until we reach the case of 2x2. We write a function that calculates moves for N bins and a function to call it that calculates move totals:
 
 
-```clojure
+{% highlight clojure %}
 (declare calculate-move-totals)
 
 (defn tally-moves-for-n-bins* [moves-matrix bottle-indices current-bin other-bin-indices]
@@ -184,18 +184,18 @@ We know have almost everything we need. We start with bottle index 0 which gener
     (let [bin-indices-subsets            (calculate-subindices bin-indices)
           tally-moves-for-n-bins         (partial tally-moves-for-n-bins* moves-matrix bottle-indices)]
         (mapcat tally-moves-for-n-bins bin-indices bin-indices-subsets))))
-```
+{% endhighlight %}
 
 Finally, we wrap the whole thing up into an `ecological-bin-packing` function that returns all the possible solutions with the best one first...afterall, the best solution may mean moving a bottle containing questionnable contents...best to leave it in its bin.
 
-```clojure
+{% highlight clojure %}
 (defn ecological-bin-packing [bottles-matrix]
    (let [bin-count   (count bottles-matrix)
         indices      (into [] (range 0 bin-count))
         moves-matrix (bottles-to-moves bottles-matrix)
         tallies      (calculate-move-totals moves-matrix indices indices)]
     (sort-by second tallies)))
-```
+{% endhighlight %}
 
 Here are a few results. For the first 2x2 problem, it doesn't matter how you sort the bottles:
 
@@ -220,7 +220,7 @@ user=> (ecological-bin-packing [[6 8 3 2] [9 1 8 8] [3 7 2 5] [3 4 7 1]])
 
 Just for fun, here's a solution in Python as well. I changed some of the names of functions/arguments between languages.
 
-```python
+{% highlight python %}
 def translate_bottles_to_moves( bottle_matrix):
   result = []
   for row in bottle_matrix:
@@ -234,7 +234,6 @@ def solve_2_by_2( full_matrix, row_indices, column_indices):
   off_diagonal_sum = full_matrix[ row_indices[ 0]][column_indices[ 1]] + full_matrix[ row_indices[ 1]][column_indices[ 0]]
   return [(column_indices, main_diagonal_sum), (column_indices[1:2] + column_indices[ 0:1], off_diagonal_sum)]
 
-
 def calculate_subindices( indices):
   results = []
   for i in xrange( len( indices)):
@@ -245,10 +244,10 @@ def calculate_subindices( indices):
 def calculate_total_moves( full_matrix, row_indices, column_indices):
   if len( row_indices) == 2:
     return solve_2_by_2( full_matrix, row_indices, column_indices)
-  
+
   current_row = row_indices[ 0]
   next_rows = row_indices[ 1:]
-  
+
   column_indices_subsets = calculate_subindices( column_indices)
 
   results = []
@@ -266,7 +265,6 @@ def ecological_bin_packing( matrix):
   all_results = calculate_total_moves( moves, range( 0, bins), range( 0, bins))
   best_to_worst = sorted( all_results, key=lambda x: x[ 1])
   return best_to_worst
-
-```
+{% endhighlight %}
 
 Cheers.

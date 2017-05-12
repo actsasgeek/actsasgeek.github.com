@@ -23,6 +23,8 @@ static domain_name_servers=192.168.1.1
 Second, if you need a name server, you should modify /etc/resolv.conf to something like:
 nameserver 8.8.8.8
 
+http://askubuntu.com/questions/58781/resolv-conf-keeps-getting-reset-by-something
+
 Third, and I don't know if this was strictly necessary but it was often useful to get back to the master from any worker if I happened to be logged in directly so I added to /etc/hosts:
 192.168.1.1 pi0
 
@@ -32,3 +34,10 @@ pi@rpy02:~ $ sudo vi /etc/hostname
 pi@rpy02:~ $ sudo vi /etc/hosts
 pi@rpy02:~ $ sudo vi /etc/network/interfaces
 pi@rpy02:~ $ sudo vi /etc/dhcpcd.conf
+
+
+Calcium Channel Ab 0.00 nmol/L <=0.02
+N-Type Calcium Channel Ab 0.00 nmol/L <=0.03
+ACh Receptor (Muscle) Bindin 0.00 nmol/L <=0.02
+AChR Ganglionic Neuronal Ab, 0.00 nmol/L <=0.02
+Neuronal (V-G) K+ Channel Ab 0.02 nmol/L <=0.02

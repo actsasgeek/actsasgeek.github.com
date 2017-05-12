@@ -14,7 +14,7 @@ I have no idea if Jaccard was actually hirsute or not...this has to do with cris
 
 We discussed the Jaccard Index last time. It is a measure (ratio) of the terms two documents have in common to the terms those two documents use:
 
-$Jaccard = \frac{|A \cap B|}{|A \cup B|}$
+$$Jaccard = \frac{|A \cap B|}{|A \cup B|}$$
 
 As with all such things, if that works for you. Perfect. Don't start out with complex things, either to implement or to explain to non-technical people (and do not discount the latter. If people do not understand something they are far less likely to support or trust it).
 
@@ -52,60 +52,61 @@ If we count the term frequency as being the degree of membership. Then we can us
 
 Intersection can be seen as logical AND. Is the element in both sets? Using 1 to denote presence and 0 to denote absence (a classical *characteristic function*), we have the following:
 
-```
+{% highlight pre %}
 AND(1, 1) == true
 AND(1, 0) == false
-```
+{% endhighlight %}
+
 Since true and false are often equated with 1 and 0 respectively, we can switch out AND for MIN and get the same result:
 
-```
+{% highlight pre %}
 MIN(1, 1) = 1
 MIN(1, 0) = 0
-```
+{% endhighlight %}
 
 So if we want a Fuzzy Intersection, following this train of thought, we are going to use MIN (there are many alternatives).
 
 Similarly, Union can be thought of as OR:
 
-```
+{% highlight pre %}
 OR(1, 1) == true
 OR(1, 0) == true
 OR(0, 0) == false
-```
+{% endhighlight %}
 
 And we can think of this as MAX:
 
-```
+{% highlight pre %}
 MAX(1, 1) = 1
 MAX(1, 0) = 1
 MAX(0, 0) = 0
-```
+{% endhighlight %}
 
 If we look at the formula for the Jaccard Index, it uses the size of a set. If we converted the set representation to 1's and 0's, then the size of the set is simply the sum of the values. We can do the same thing to calculate the size of intersection by using MIN then SUM. And now if we substitute our crisp set memberships for fuzzy set memberships, we can calculate a Fuzzy Jaccard Index.
 
 In code,
 
-```python
+{% highlight python %}
 def fuzzy_jaccard( a, b):
   fuzzy_intersection = sum([min( a[ t], b.get( t, 0.0)) for t in a.keys()])
   crisp_union = set(a.keys()).union( set( b.keys()))
   fuzzy_union = sum([max( a.get( t, 0.0), b.get( t, 0.0)) for t in crisp_union])
   return fuzzy_intersection / fuzzy_union
-```
+{% endhighlight %}
 
 Here are some TFs from last time:
 
-```
+{% highlight python %}
 tfs = [{'shamrock': 0.25, 'leprechaun': 0.125, 'cold': 0.125, 'green': 0.125, 'wet': 0.375},
  {'evergreen': 0.14285714285714285, 'ipa': 0.14285714285714285, 'rocky': 0.14285714285714285, 'hipster': 0.14285714285714285, 'wet': 0.2857142857142857, 'cold': 0.14285714285714285},
  {'rocky': 0.125, 'guinness': 0.125, 'wet': 0.25, 'leprechaun': 0.125, 'cold': 0.25, 'wool': 0.125},
  {'rocky': 0.125, 'salmon': 0.125, 'pacific': 0.125, 'hipster': 0.125, 'wet': 0.25, 'cold': 0.25},
  {'cold': 0.375, 'wool': 0.125, 'hipster': 0.125, 'rocky': 0.125, 'wet': 0.25}]
-```
+{% endhighlight %}
 
 And the Jaccard Index from last time:
 
-```python
+{% highlight python %}
 def jaccard(a, b):
   d1 = set(a.keys())
   d2 = set(b.keys())
@@ -113,20 +114,20 @@ def jaccard(a, b):
   union = d1.union( d2)
   jaccard = len( intersection)/len( union)
   return jaccard
-```
+{% endhighlight %}
 
 Let's compare them:
 
-```
+{% highlight python %}
 >>> jaccard( tfs[0], tfs[0])
 1.0
 >>> fuzzy_jaccard( tfs[0], tfs[0])
 1.0
-```
+{% endhighlight %}
 
 Nice. A document should always be the same as itself. Here are a few more comparisons. When comparing Document 1 (index 0) with Document 2 (index 1), the fuzzy jaccard is a bit higher. Conversely, the fuzzy jaccard is a bit lower when comparing to Document 3 (index 2).
 
-```
+{% highlight python %}
 >>> jaccard( tfs[0], tfs[1])
 0.2222222222222222
 >>> fuzzy_jaccard( tfs[0], tfs[1])
@@ -135,7 +136,7 @@ Nice. A document should always be the same as itself. Here are a few more compar
 0.375
 >>> fuzzy_jaccard( tfs[0], tfs[2])
 0.3333333333333333
-```
+{% endhighlight %}
 
 Although the difference does seem large here. It can make a difference to some applications. Like everything else YMMV (your mileage may vary).
 
@@ -143,19 +144,19 @@ Although the difference does seem large here. It can make a difference to some a
 
 Euclidean distance is the workhorse of distance metrics and while it has its flaws, many of them (such as features of different magnitudes), don't show up in this application. Euclidean distance is the square root of the sum of squared differences between the two vectors. Strictly speaking, because we are often only *comparing* distances in these kinds of applications, we need not take the final square root but we will in this case:
 
-```python
+{% highlight python %}
 import math
 def euclidean_distance( a, b):
   all_terms = set(a.keys()).union( set( b.keys()))
   return math.sqrt(sum([(a.get( t, 0.0) - b.get( t, 0.0))**2 for t in all_terms]))
-```
+{% endhighlight %}
 
 We can check our function using a well known result:
 
-```
+{% highlight python %}
 >>> euclidean_distance({"a": 3, "b": 0}, {"a": 0, "b": 4})
 5.0
-```
+{% endhighlight %}
 
 ## Correlations
 
@@ -163,7 +164,7 @@ And this is where it gets, well, [supercalifragilisticexpialidocious](https://ww
 
 Below we will use the 2nd definition of Pearson's, after the first re-arranging, from Wikipedia:
 
-```python
+{% highlight python %}
 def pearsons_correlation( a, b):
   all_terms = set(a.keys()).union( set( b.keys()))
   n = len( all_terms)
@@ -175,7 +176,7 @@ def pearsons_correlation( a, b):
   numerator = n * sum_ab - sum_a * sum_b
   denominator = math.sqrt(n * sum_a2 - sum_a**2) * math.sqrt(n * sum_b2 - sum_b**2)
   return numerator / denominator
-```
+{% endhighlight %}
 
 There is also a single pass formulation if efficiency is required. We can test the result here:
 
@@ -198,25 +199,25 @@ We will need to create a representation of the *non* sparse vector for each docu
 
 Because the result of #3 is a regular vector of data with a paired ordering. We can use the `scipy` implementation of `spearmans`.
 
-```python
+{% highlight python %}
 def convert_to_non_sparse(a, b):
   all_terms = list( set(a.keys()).union( set( b.keys())))
   all_terms.sort()
   new_a = [a.get( t, 0.0) for t in all_terms]
   new_b = [b.get( t, 0.0) for t in all_terms]
   return new_a, new_b
-```
+{% endhighlight %}
 
 Now that we have non-sparse representations, we can use `spearmanr`:
 
-```python
+{% highlight python %}
 import scipy.stats as stats
 
 def spearmans_correlation( a, b):
   new_a, new_b = convert_to_non_sparse( a, b)
   rho, _ = stats.spearmanr( new_a, new_b)
   return rho
-```
+{% endhighlight %}
 
 Note that we could have done something similar to use `scipy`'s Pearson's correlation coefficient.
 

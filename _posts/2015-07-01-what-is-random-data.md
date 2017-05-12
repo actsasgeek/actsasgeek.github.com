@@ -97,23 +97,23 @@ Let's make our system a bit more complicated and the discussion a wee bit confus
 
 I'm going to make an additional assumption that the factors are going to be largely independent of each other. Why? Suppose we have the following:
 
-$$ y = 10 + 0.75 x\_1 - 0.25 x_2 $$
+$$ y = 10 + 0.75 x_1 - 0.25 x_2 $$
 
-$$ x\_2 = 0.5 - 0.25 x\_1 $$
+$$ x\_2 = 0.5 - 0.25 x_1 $$
 
-Then I can substitute $x\_1$ for $x\_2$ like so:
+Then I can substitute $x_1$ for $x_2$ like so:
 
-$$y = 10 + 0.75 x\_1 - 0.25(0.5 -0.25 x\_1)$$
+$$y = 10 + 0.75 x_1 - 0.25(0.5 -0.25 x_1)$$
 
 and simplify:
 
-$$y = 9.875 + 0.8125 x\_1$$
+$$y = 9.875 + 0.8125 x_1$$
 
-In that case, there's no point in adding $x\_2$. It rarely happens in real life to that degree but it can happen to _some_ degree and I'm just ruling it out for now.
+In that case, there's no point in adding $x_2$. It rarely happens in real life to that degree but it can happen to _some_ degree and I'm just ruling it out for now.
 
-As before, I'm going to sample values of $x\_2$ from a uniform distribution in the range $(-1, 1)$ and simulate the following deterministic equation:
+As before, I'm going to sample values of $x_2$ from a uniform distribution in the range $(-1, 1)$ and simulate the following deterministic equation:
 
-$$y = 10 + 0.75 x\_1 - 0.25 x\_2$$
+$$y = 10 + 0.75 x_1 - 0.25 x_2$$
 
 ```lisp
 (def xs2 (np.array (list (take *n* (repeatedly arbitrary-x)))))
@@ -125,9 +125,9 @@ $$y = 10 + 0.75 x\_1 - 0.25 x\_2$$
 
 That's kind of interesting. It seems to be taking on less of uniform shape.
 
-Let's keep adding new factors to our system. Let's add $x\_3$:
+Let's keep adding new factors to our system. Let's add $x_3$:
 
-$$y = 10 + 0.75 x\_1 - 0.25 x\_2 + 0.13 x\_3$$ 
+$$y = 10 + 0.75 x_1 - 0.25 x_2 + 0.13 x_3$$
 
 
 ```lisp
@@ -140,7 +140,7 @@ $$y = 10 + 0.75 x\_1 - 0.25 x\_2 + 0.13 x\_3$$
 
 Now we're starting to see some bunching in the middle. Let's add another factor, a negative one:
 
-$$y = 10 + 0.75 x\_1 - 0.25 x\_2 + 0.13 x\_3 - 0.07 x\_4$$ 
+$$y = 10 + 0.75 x\_1 - 0.25 x\_2 + 0.13 x\_3 - 0.07 x\_4$$
 
 ```lisp
 (def xs4 (np.array (list (take *n* (repeatedly arbitrary-x)))))
@@ -153,7 +153,7 @@ $$y = 10 + 0.75 x\_1 - 0.25 x\_2 + 0.13 x\_3 - 0.07 x\_4$$
 
 And then perhaps a bit more of a positive spin, $x\_5$:
 
-$$y = 10 + 0.75 x\_1 - 0.25 x\_2 + 0.13 x\_3 - 0.07 x\_4 + 0.37 x\_5$$ 
+$$y = 10 + 0.75 x\_1 - 0.25 x\_2 + 0.13 x\_3 - 0.07 x\_4 + 0.37 x\_5$$
 
 
 ```lisp
